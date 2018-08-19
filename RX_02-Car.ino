@@ -1,4 +1,5 @@
-//Projeto RX_02 19/08/2018
+// Projeto RX_02 19/08/2018
+// Sensor Ulta-sonico ativado
 
 #include <Servo.h> //Biblioteca utilizada
 Servo servoMotor;  // Cria um Objeto servo chamado Servo
@@ -34,21 +35,49 @@ int IREsquerdo = 53; // Escolhe pino de entrada para Sensor Infravermelho Esquer
 int duration, distance, velocidade, velocidadeRot;
 int flag_motor_active = 0;
 
+//Sensor ultrasonicos
+const int echoPin = 2;
+const int trigPin = 3;
+
 //Define valor de curva
 int curva = 50;
-
 char letra = '*';
 const int buzzer = 24;
+
+int distanciaUltra;
+long duracao;
 
 void setup() {
   velocidade = 0; //Define a velocidade dos motores frente
   velocidadeRot = 0; //Define a velocidade da Rotacao
 
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  
   pinMode(leds, OUTPUT);
   digitalWrite(leds, HIGH); //Inicia com os Leds apagados
   Serial.begin(9600);
   servoMotor.attach(50); //porta do Servo
   servoMotor.write(posServo); //Comeca o motor na posicao Meio
+}
+
+int ultrassonicDist(int trigPin, int echoPin){
+  //seta o pino com um pulso baixo "LOW" ou desligado
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  
+  //seta o pino com pulso alto "HIGH" ou ligado
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+  //pulseIn lê o tempo entre a chamada e o pino entrar em high
+  duracao = pulseIn(echoPin, HIGH);
+  
+  //esse calculo é baseado em s = v . t, lembrando que o tempo vem dobrado, tempo de ida e volta do ultrassom
+  //distancia = (duracao/2) / 29.1; 
+
+  return ((duracao/2) / 29.1);
 }
 
 void rotacaoServoMotor(boolean active) {
@@ -155,7 +184,7 @@ void gerenciaVelocidade() {
 }
 
 void sensorIRDireito() {
-  if (digitalRead(IRDireito) == LOW) {
+  if ((digitalRead(IRDireito) == LOW) || ((posServo > 150)  && (distanciaUltra <= 20) && setServoMotor == true)) {
     velocidadeRot = 220; //Define a velocidade da Rotacao
     motorEsquerda();
     delay (210);
@@ -164,7 +193,7 @@ void sensorIRDireito() {
 }
 
 void sensorIREsquerdo() {
-  if (digitalRead(IREsquerdo) == LOW) {
+  if ((digitalRead(IREsquerdo) == LOW) || ((posServo < 150)  && (distanciaUltra <= 20) && setServoMotor == true)) {
     velocidadeRot = 220; //Define a velocidade da Rotacao
     motorDireita();
     delay (210);
@@ -173,6 +202,11 @@ void sensorIREsquerdo() {
 }
 
 void loop() {
+  //Serial.print("Distancia da Esquerda: ");
+  distanciaUltra = (ultrassonicDist(trigPin, echoPin)); 
+  //Serial.println(distanciaUltra);
+  //Serial.println("------------------------------------");
+
   //Leitura de Sensores Infra-Vermelho
   sensorIRDireito();
   sensorIREsquerdo();
