@@ -1,10 +1,10 @@
-// Projeto RX_02 19/08/2018
+// Projeto RX_02 28/07/2020
 // Sensor Ulta-sonico ativado
 
 #include <Servo.h> //Biblioteca utilizada
 Servo servoMotor;  // Cria um Objeto servo chamado Servo
 
-int posServo = 120; //Definimos a variável que indica a posição do servo inicial
+int posServo = 10; //Definimos a variável que indica a posição do servo inicial
 int flagServo = 0;
 boolean setServoMotor = false;
 
@@ -25,7 +25,10 @@ int motDTF = 10;
 int motDTT = 11;
 
 //Iluminacao
-int leds = 22;
+int led_1 = 22;
+int led_2 = 23;
+int led_3 = 24;
+int led_4 = 25;
 
 //Sesor Fotoeletrico
 int IRDireito = 52; // Escolhe pino de entrada para Sensor Infravermelho Direito
@@ -42,7 +45,7 @@ const int trigPin = 3;
 //Define valor de curva
 int curva = 50;
 char letra = '*';
-const int buzzer = 24;
+const int buzzer = 12;
 
 int distanciaUltra;
 long duracao;
@@ -54,31 +57,39 @@ void setup() {
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   
-  pinMode(leds, OUTPUT);
-  digitalWrite(leds, HIGH); //Inicia com os Leds apagados
+  pinMode(led_1, OUTPUT);
+  pinMode(led_2, OUTPUT);
+  pinMode(led_3, OUTPUT);
+  pinMode(led_4, OUTPUT);
+  
+  digitalWrite(led_1, HIGH); //Inicia com os Leds apagados
+  digitalWrite(led_2, HIGH); //Inicia com os Leds apagados
+  digitalWrite(led_3, HIGH); //Inicia com os Leds apagados
+  digitalWrite(led_4, HIGH); //Inicia com os Leds apagados
+  
   Serial.begin(9600);
-  servoMotor.attach(50); //porta do Servo
+  servoMotor.attach(13); //porta do Servo
   servoMotor.write(posServo); //Comeca o motor na posicao Meio
 }
 
-int ultrassonicDist(int trigPin, int echoPin){
-  //seta o pino com um pulso baixo "LOW" ou desligado
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  
-  //seta o pino com pulso alto "HIGH" ou ligado
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  
-  //pulseIn lê o tempo entre a chamada e o pino entrar em high
-  duracao = pulseIn(echoPin, HIGH);
-  
-  //esse calculo é baseado em s = v . t, lembrando que o tempo vem dobrado, tempo de ida e volta do ultrassom
-  //distancia = (duracao/2) / 29.1; 
-
-  return ((duracao/2) / 29.1);
-}
+//int ultrassonicDist(int trigPin, int echoPin){
+//  //seta o pino com um pulso baixo "LOW" ou desligado
+//  digitalWrite(trigPin, LOW);
+//  delayMicroseconds(2);
+//  
+//  //seta o pino com pulso alto "HIGH" ou ligado
+//  digitalWrite(trigPin, HIGH);
+//  delayMicroseconds(10);
+//  digitalWrite(trigPin, LOW);
+//  
+//  //pulseIn lê o tempo entre a chamada e o pino entrar em high
+//  duracao = pulseIn(echoPin, HIGH);
+//  
+//  //esse calculo é baseado em s = v . t, lembrando que o tempo vem dobrado, tempo de ida e volta do ultrassom
+//  //distancia = (duracao/2) / 29.1; 
+//
+//  return ((duracao/2) / 29.1);
+//}
 
 void rotacaoServoMotor(boolean active) {
   //flagServo 1 Esquerda
@@ -87,17 +98,15 @@ void rotacaoServoMotor(boolean active) {
 
   if (active == true) {
     //Define a flag de apoio
-    if (posServo == 120) flagServo = 1;
-    else if (posServo == 180) flagServo = 2;
+    if (posServo == 20) flagServo = 1;
+    else if (posServo == 190) flagServo = 2;
 
     //Configura o incremento ou decremento do valor do Servo-Motor
     if (flagServo == 1) posServo++;
     else if (flagServo == 2) posServo--;
-
   } else {
-    posServo = 150;
+    posServo = 100;
   }
-
   servoMotor.write(posServo);
 }
 
@@ -203,13 +212,13 @@ void sensorIREsquerdo() {
 
 void loop() {
   //Serial.print("Distancia da Esquerda: ");
-  distanciaUltra = (ultrassonicDist(trigPin, echoPin)); 
+  //distanciaUltra = (ultrassonicDist(trigPin, echoPin)); 
   //Serial.println(distanciaUltra);
   //Serial.println("------------------------------------");
 
   //Leitura de Sensores Infra-Vermelho
-  sensorIRDireito();
-  sensorIREsquerdo();
+  //sensorIRDireito();
+  //sensorIREsquerdo();
 
   //Verifica a posicao do Servo-Motor
   rotacaoServoMotor(setServoMotor);
@@ -296,25 +305,25 @@ void loop() {
         flag_motor_active = 0;
         break;
       case 'W':
-        digitalWrite(leds, LOW);
+        digitalWrite(led_1, LOW);
         break;
       case 'w':
-        digitalWrite(leds, HIGH);
+        digitalWrite(led_1, HIGH);
         break;
       case 'U':
-        //---------------------------//
+        digitalWrite(led_3, LOW);
         break;
       case 'u':
-        //---------------------------//
+        digitalWrite(led_3, HIGH);
         break;
       case 'V':
-        tone(buzzer, 1730);
+        tone(buzzer, 1700);
         break;
       case 'v':
         noTone(buzzer);
         break;
       case 'X':
-        posServo = 120; //Inicia o ciclo
+        posServo = 20; //Inicia o ciclo
         setServoMotor = true;
         break;
       case 'x':
@@ -324,7 +333,7 @@ void loop() {
         //---------------------------//
         break;
       default:
-        Serial.println("Opcao Invalida");
+        // Serial.println("Opcao Invalida");
         break;
     } // end: switch
   }
